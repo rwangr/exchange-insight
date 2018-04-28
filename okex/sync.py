@@ -115,7 +115,7 @@ class SyncFullPairThrd(threading.Thread):
                         break
             if data:
                 parser = SyncOnePairThrdLaunch(self.api_meth, self.db_meth,
-                                               **self.data, **self.kwargs)
+                                               **data, **self.kwargs)
                 parser.start()
                 data = None
                 del parser
