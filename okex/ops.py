@@ -52,7 +52,7 @@ class OpRawResponse(OpRawBase):
                        stamp))
             #-----Warning Log-----#
 
-            return None
+            return ()
         if self.api_meth == 'kline':
             sort_key = None
             head = [self.kwargs.get('pair_id'), self.kwargs.get('period')]

@@ -94,7 +94,7 @@ class SyncOnePairThrdLaunch():
             data = api_parser.get_insert_param(stamp)
             self.__set_queue(data)
             self.queue.join()
-            if data and len(data) <= 1:
+            if len(data) <= 1:
                 break
         for t in self.threads:
             t.join()
