@@ -151,3 +151,21 @@ class OpDbPair(OpDbBase):
         result = self.executor.get(sql, param=(self.exchange), fetchall=True)
         if result and result != ['ERROR']:
             return result
+
+
+class OpTimer():
+    def __init__(self, duration):
+        self.duration = duration
+        self.start = 0
+
+    def reset(self):
+        self.start = 0
+
+    def timesup(self):
+        now = time.time()
+        if self.start and now - self.start >= self.duration:
+            return True
+        else:
+            if not self.start:
+                self.start = time.time()
+            return False
