@@ -15,7 +15,7 @@ from logger import *
 
 MAX_THRD_FULL = 10
 MAX_THRD_ONE = 5
-MAX_THRD_IDLE_TIMEOUT = 1
+MAX_THRD_IDLE_TIMEOUT = 2
 INSERT_COUNT = 0
 
 
@@ -112,16 +112,31 @@ class SyncFullPairThrd(threading.Thread):
         self.lock = lock
         self.data = None
         self.kwargs = kwargs
+        self.idle_time = 0
+
+    def __is_timeout(self):
+        if self.idle_time:
+            if time.time() - self.idle_time > MAX_THRD_IDLE_TIMEOUT:
+                return True
+            else:
+                return False
+        else:
+            self.idle_time = time.time()
+            return False
 
     def run(self):
         while True:
             with self.lock:
                 if not self.queue.empty():
                     self.data = self.queue.get()
+                    self.idle_time = 0
+                elif self.__is_timeout():
+                    break
             if self.data:
                 parser = SyncOnePairThrdLaunch(self.api_meth, self.db_meth,
                                                **self.data, **self.kwargs)
                 parser.start()
+                self.data=None
                 del parser
                 self.queue.task_done()
 

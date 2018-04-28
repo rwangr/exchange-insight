@@ -5,6 +5,7 @@ import os
 import time
 import logging
 import pymysql.cursors
+from DBUtils.PooledDB import PooledDB
 from DBUtils.PersistentDB import PersistentDB
 from okex.okexAPI.rest.OkcoinSpotAPI import *
 from decimal import *
@@ -20,17 +21,34 @@ class DBConnBase():
         try:
             CONN_POOL
         except NameError:
-            CONN_POOL = PersistentDB(
+            # CONN_POOL = PersistentDB(
+            #     creator=pymysql,
+            #     maxusage=5000,
+            #     ping=1,
+            #     closeable=True,
+            #     host=CONN_STRING['host'],
+            #     port=CONN_STRING['port'],
+            #     user=CONN_STRING['user'],
+            #     password=CONN_STRING['password'],
+            #     db=CONN_STRING['db'],
+            #     charset=CONN_STRING['charset'])
+            CONN_POOL = PooledDB(
                 creator=pymysql,
-                maxusage=5000,
-                ping=1,
-                closeable=True,
+                maxconnections=60,
+                mincached=5,
+                maxcached=50,
+                maxshared=None,
+                blocking=True,
+                maxusage=None,
+                setsession=[],
+                ping=0,
                 host=CONN_STRING['host'],
                 port=CONN_STRING['port'],
                 user=CONN_STRING['user'],
                 password=CONN_STRING['password'],
                 db=CONN_STRING['db'],
                 charset=CONN_STRING['charset'])
+
         else:
             pass
 
