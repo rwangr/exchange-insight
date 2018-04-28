@@ -44,12 +44,14 @@ class OpRawResponse(OpRawBase):
         data = eval('self.handler.%s' % self.api_meth)(
             **self.kwargs, since=stamp)
         if type(data) == dict and data.get('error_code'):
+
             #-----Warning Log-----#
             logger.warning(
                 'API {0} Responds Error: code {1}, Param(kwargs: {2},stamp: {3})'.
                 format(self.api_meth, data.get('error_code'), self.kwargs,
                        stamp))
             #-----Warning Log-----#
+
             return None
         if self.api_meth == 'kline':
             sort_key = None
@@ -74,7 +76,7 @@ class OpDbCandlestick(OpDbBase):
         OpDbBase.__init__(self, **kwargs)
 
     def insert(self, param, **kwargs):
-        sql = "INSERT IGNORE INTO `OKEX_CANDLESTICK_QA_{0}` \
+        sql = "INSERT IGNORE INTO `OKEX_CANDLESTICK_{0}` \
             (`PAIR_ID`, `PERIOD`, `TIMESTAMP`, `OPEN`, `CLOSE`, `HIGH`, `LOW`, `VOLUME`) \
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)".format(
             self.period.upper())
@@ -83,7 +85,7 @@ class OpDbCandlestick(OpDbBase):
         return affected
 
     def get_last_stamp(self):
-        sql = "SELECT `SEQ`,`TIMESTAMP` FROM `OKEX_CANDLESTICK_QA_{0}` \
+        sql = "SELECT `SEQ`,`TIMESTAMP` FROM `OKEX_CANDLESTICK_{0}` \
              WHERE `PAIR_ID`=%s \
              ORDER BY `SEQ` DESC LIMIT 1".format(self.period.upper())
 
@@ -101,7 +103,7 @@ class OpDbTransaction(OpDbBase):
         OpDbBase.__init__(self, **kwargs)
 
     def insert(self, param, **kwargs):
-        sql = "INSERT IGNORE INTO `OKEX_TRANSACTION_QA` \
+        sql = "INSERT IGNORE INTO `OKEX_TRANSACTION` \
             (`PAIR_ID`, `TID`, `DATE`, `DATE_MS`, `PRICE`, `AMOUNT`, `TYPE`) \
             VALUES (%s, %s, %s, %s, %s, %s, %s)"
 
@@ -109,7 +111,7 @@ class OpDbTransaction(OpDbBase):
         return affected
 
     def get_last_stamp(self):
-        sql = "SELECT `SEQ`,`TID` FROM `OKEX_TRANSACTION_QA` \
+        sql = "SELECT `SEQ`,`TID` FROM `OKEX_TRANSACTION` \
              WHERE `PAIR_ID`=%s \
              ORDER BY `seq` DESC LIMIT 1"
 

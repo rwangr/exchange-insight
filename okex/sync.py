@@ -13,9 +13,9 @@ from okex.base import *
 from okex.ops import *
 from logger import *
 
-MAX_THRD_FULL = 5
-MAX_THRD_ONE = 10
-
+MAX_THRD_FULL = 10
+MAX_THRD_ONE = 5
+MAX_THRD_IDLE_TIMEOUT = 1
 INSERT_COUNT = 0
 
 
@@ -30,16 +30,16 @@ class SyncOnePairThrd(threading.Thread):
 
     def __is_timeout(self):
         if self.idle_time:
-            if time.time() - self.idle_time > 30:
+            if time.time() - self.idle_time > MAX_THRD_IDLE_TIMEOUT:
                 return True
             else:
                 return False
         else:
             self.idle_time = time.time()
+            return False
 
     def run(self):
         self.db_parser = globals().get(self.db_meth)(**self.kwargs)
-        start_time = time.time()
         while True:
             with self.lock:
                 if not self.queue.empty():
@@ -94,7 +94,7 @@ class SyncOnePairThrdLaunch():
             data = api_parser.get_insert_param(stamp)
             self.__set_queue(data)
             self.queue.join()
-            if type(data) is list and len(data) <= 1:
+            if data and len(data) <= 1:
                 break
         for t in self.threads:
             t.join()

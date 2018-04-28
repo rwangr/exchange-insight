@@ -17,18 +17,11 @@ from logger import *
 
 def main(*args, **kwargs):
 
-    parser = argparse.ArgumentParser(
-        description='Exchange Insight Data Sync Engine.')
-    parser.add_argument('--api', type=str, default=None)
-    parser.add_argument('--opdb', type=str, default=None)
-    parser.add_argument('--period', type=str, default=None)
-    args = parser.parse_args()
-
-    parser = SyncFullPairThrdLaunch(
-        api_meth=args.api, db_meth=args.opdb, period=args.period)
+    parser = SyncFullPairThrdLaunch(**kwargs)
     parser.start()
 
-    # parser = SyncFullPairThrdLaunch(api_meth='kline', db_meth='OpDbCandlestick', period='30min')
+    # parser = SyncFullPairThrdLaunch(
+    #     api_meth='kline', db_meth='OpDbCandlestick', period='30min')
     # parser.start()
 
     # parser = SyncFullPairThrdLaunch(api_meth='trades', db_meth='OpDbTransaction')
@@ -36,5 +29,15 @@ def main(*args, **kwargs):
 
 
 if __name__ == "__main__":
-    main()
+
+    parser = argparse.ArgumentParser(
+        description='Exchange Insight Data Sync Engine.')
+    parser.add_argument('--cwd', type=str, default=os.getcwd())
+    parser.add_argument('--api', type=str, default=None)
+    parser.add_argument('--opdb', type=str, default=None)
+    parser.add_argument('--pd', type=str, default=None)
+    args = parser.parse_args()
+    os.chdir(str(args.cwd))
+
+    main(api_meth=str(args.api), db_meth=str(args.opdb), period=str(args.pd))
     sys.exit()
