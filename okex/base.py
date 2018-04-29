@@ -34,9 +34,9 @@ class DBConnBase():
             #     charset=CONN_STRING['charset'])
             CONN_POOL = PooledDB(
                 creator=pymysql,
-                maxconnections=6,
-                mincached=2,
-                maxcached=6,
+                maxconnections=100,
+                mincached=24,
+                maxcached=80,
                 maxshared=0,
                 blocking=True,
                 maxusage=0,
@@ -61,7 +61,8 @@ class DBConnBase():
 
 class SQLExecutor():
     def __init__(self, **kwargs):
-        self.connection = DBConnBase().connect()
+        db_parser = DBConnBase(**kwargs)
+        self.connection = db_parser.connect()
 
         #-----Debug Log-----#
         global CONN_COUNT

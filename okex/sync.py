@@ -13,8 +13,8 @@ from okex.base import *
 from okex.ops import *
 from logger import *
 
-MAX_THRD_FULL = 3
-MAX_THRD_ONE = 2
+MAX_THRD_FULL = 20
+MAX_THRD_ONE = 4
 MAX_THRD_IDLE_TIMEOUT = 2
 INSERT_COUNT = 0
 
@@ -155,5 +155,5 @@ class SyncFullPairThrdLaunch():
         pairs = parser.get_active()
         self.__set_queue(pairs)
         self.queue.join()
-        #for t in self.threads:
-        #    t.join()
+        for t in self.threads:
+            t.join()
