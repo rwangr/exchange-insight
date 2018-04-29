@@ -13,8 +13,8 @@ from okex.base import *
 from okex.ops import *
 from logger import *
 
-MAX_THRD_FULL = 6
-MAX_THRD_ONE = 2
+MAX_THRD_FULL = 5
+MAX_THRD_ONE = 5
 MAX_THRD_IDLE_TIMEOUT = 2
 INSERT_COUNT = 0
 
