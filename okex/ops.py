@@ -78,7 +78,7 @@ class OpDbCandlestick(OpDbBase):
     def insert(self, param, **kwargs):
         sql = "INSERT IGNORE INTO `OKEX_CANDLESTICK_{0}` \
             (`PAIR_ID`, `PERIOD`, `TIMESTAMP`, `OPEN`, `CLOSE`, `HIGH`, `LOW`, `VOLUME`) \
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)".format(
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"                                                                                                                                                                                                                .format(
             self.period.upper())
 
         affected = self.executor.set(sql, param, **kwargs)
@@ -87,13 +87,13 @@ class OpDbCandlestick(OpDbBase):
     def get_last_stamp(self):
         sql = "SELECT `SEQ`,`TIMESTAMP` FROM `OKEX_CANDLESTICK_{0}` \
              WHERE `PAIR_ID`=%s \
-             ORDER BY `SEQ` DESC LIMIT 1".format(self.period.upper())
+             ORDER BY `SEQ` DESC LIMIT 1"                                                                                                                                                                    .format(self.period.upper())
 
         result = self.executor.get(sql, param=(self.pair_id))
-        if result != ['ERROR']:
-            return result.get('TIMESTAMP') if result else '0'
+        if result and result != ['ERROR']:
+            return result.get('TIMESTAMP')
         else:
-            return '99999999999999'
+            return '0'
 
 
 class OpDbTransaction(OpDbBase):
@@ -116,10 +116,10 @@ class OpDbTransaction(OpDbBase):
              ORDER BY `seq` DESC LIMIT 1"
 
         result = self.executor.get(sql, param=(self.pair_id))
-        if result != ['ERROR']:
-            return result.get('TID') if result else '0'
+        if result and result != ['ERROR']:
+            return result.get('TID')
         else:
-            return '99999999999999'
+            return '0'
 
 
 class OpDbPair(OpDbBase):
@@ -151,6 +151,8 @@ class OpDbPair(OpDbBase):
         result = self.executor.get(sql, param=(self.exchange), fetchall=True)
         if result and result != ['ERROR']:
             return result
+        else:
+            return []
 
 
 class OpTimer():

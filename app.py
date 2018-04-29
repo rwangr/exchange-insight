@@ -17,7 +17,7 @@ from logger import *
 
 def main(*args, **kwargs):
 
-    parser = SyncFullPairThrdLaunch(**kwargs)
+    parser = SyncPairsThrdLaunch(**kwargs)
     parser.start()
 
     # parser = SyncFullPairThrdLaunch(
