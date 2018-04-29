@@ -34,9 +34,9 @@ class DBConnBase():
             #     charset=CONN_STRING['charset'])
             CONN_POOL = PooledDB(
                 creator=pymysql,
-                maxconnections=25,
+                maxconnections=20,
                 mincached=15,
-                maxcached=25,
+                maxcached=20,
                 maxshared=0,
                 blocking=True,
                 maxusage=0,

@@ -40,18 +40,16 @@ class OpRawResponse(OpRawBase):
                         result.append(tuple(head + list(raw.values())))
         return tuple(result)
 
-    def get_insert_param(self, stamp):
+    def get_insert_param(self, stamp, **kwargs):
         data = eval('self.handler.%s' % self.api_meth)(
             **self.kwargs, since=stamp)
         if type(data) == dict and data.get('error_code'):
-
             #-----Warning Log-----#
             logger.warning(
-                'API {0} Responds Error: code {1}, Param(kwargs: {2},stamp: {3})'.
+                'API {0} Responds Error: Code {1}, Param(kwargs: {2},stamp: {3})'.
                 format(self.api_meth, data.get('error_code'), self.kwargs,
                        stamp))
             #-----Warning Log-----#
-
             return ()
         if self.api_meth == 'kline':
             sort_key = None
@@ -78,7 +76,7 @@ class OpDbCandlestick(OpDbBase):
     def insert(self, param, **kwargs):
         sql = "INSERT IGNORE INTO `OKEX_CANDLESTICK_{0}` \
             (`PAIR_ID`, `PERIOD`, `TIMESTAMP`, `OPEN`, `CLOSE`, `HIGH`, `LOW`, `VOLUME`) \
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"                                                                                                                                                                                                                .format(
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)".format(
             self.period.upper())
 
         affected = self.executor.set(sql, param, **kwargs)
@@ -87,7 +85,7 @@ class OpDbCandlestick(OpDbBase):
     def get_last_stamp(self):
         sql = "SELECT `SEQ`,`TIMESTAMP` FROM `OKEX_CANDLESTICK_{0}` \
              WHERE `PAIR_ID`=%s \
-             ORDER BY `SEQ` DESC LIMIT 1"                                                                                                                                                                    .format(self.period.upper())
+             ORDER BY `SEQ` DESC LIMIT 1".format(self.period.upper())
 
         result = self.executor.get(sql, param=(self.pair_id))
         if result and result != ['ERROR']:
