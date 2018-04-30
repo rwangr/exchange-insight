@@ -16,6 +16,9 @@ class OpRawBase():
     def __init__(self, **kwargs):
         self.handler = APIConnBase().connect()
 
+    def __del__(self):
+        del self
+
 
 class OpRawResponse(OpRawBase):
     def __init__(self, api_meth, **kwargs):
@@ -82,6 +85,9 @@ class OpDbBase():
     def __init__(self, **kwargs):
         self.executor = SQLExecutor(**kwargs)
 
+    def __del__(self):
+        del self
+
 
 class OpDbCandlestick(OpDbBase):
     def __init__(self, pair_id, period, **kwargs):
@@ -93,7 +99,7 @@ class OpDbCandlestick(OpDbBase):
     def insert(self, param, **kwargs):
         sql = "INSERT IGNORE INTO `OKEX_CANDLESTICK_{0}` \
             (`PAIR_ID`, `PERIOD`, `TIMESTAMP`, `OPEN`, `CLOSE`, `HIGH`, `LOW`, `VOLUME`) \
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)".format(
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"                                                                                                                                                                                                                                                                    .format(
             self.period.upper())
 
         affected = self.executor.set(sql, param, **kwargs)
@@ -102,7 +108,7 @@ class OpDbCandlestick(OpDbBase):
     def get_last_stamp(self):
         sql = "SELECT `SEQ`,`TIMESTAMP` FROM `OKEX_CANDLESTICK_{0}` \
              WHERE `PAIR_ID`=%s \
-             ORDER BY `SEQ` DESC LIMIT 1".format(self.period.upper())
+             ORDER BY `SEQ` DESC LIMIT 1"                                                                                                                                                                                                             .format(self.period.upper())
 
         result = self.executor.get(sql, param=(self.pair_id))
         if result and result != ['ERROR']:
@@ -114,6 +120,7 @@ class OpDbCandlestick(OpDbBase):
         self.__del__()
 
     def __del__(self):
+        OpDbBase.__del__(self)
         del self
 
 
@@ -146,6 +153,7 @@ class OpDbTransaction(OpDbBase):
         self.__del__()
 
     def __del__(self):
+        OpDbBase.__del__(self)
         del self
 
 
@@ -192,6 +200,7 @@ class OpDbPair(OpDbBase):
         self.__del__()
 
     def __del__(self):
+        OpDbBase.__del__(self)
         del self
 
 
