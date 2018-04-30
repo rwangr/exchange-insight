@@ -55,7 +55,7 @@ class SyncPairsThrdLaunch():
     def start(self):
         parser = OpDbPair(EXCHANGE)
         pairs = parser.get_active()
-        parser.close()
+        del parser
         self.__set_pair_queue(pairs)
         self.__init_thread()
         self.pair_queue.join()
@@ -83,14 +83,25 @@ class SyncPairsFetchThrd(threading.Thread):
                     db_parser = globals().get(self.db_meth)(**pair,
                                                             **self.kwargs)
                     stamp = db_parser.get_last_stamp()
-                    db_parser.close()
+                    del db_parser
                     api_parser = OpRawResponse(self.api_meth, **pair,
                                                **self.kwargs)
                     param = api_parser.get_insert_param(stamp)
-                    api_parser.close()
-                    if param and len(param) > 1:
+                    del api_parser
+                    if param and len(param) > MIN_UPDATE_THRESHOLD:
                         self.param_queue.put({'pair': pair, 'param': param})
                         param = None
+                    else:
+
+                        #-----Info Log-----#
+                        logger.info(
+                        'Fetch Thread {0}: ({1}, {2}, {3}) is already up-to-date and skipped.'.
+                        format(
+                            self.kwargs.get('ID'),
+                            pair.get('pair_id'), pair.get('symbol'),
+                            self.kwargs.get('period')))
+                        #-----Info Log-----#
+
                     self.pair_queue.task_done()
                 elif self.timer.timesup():
                     break

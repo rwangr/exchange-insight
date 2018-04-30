@@ -16,9 +16,6 @@ class OpRawBase():
     def __init__(self, **kwargs):
         self.handler = APIConnBase().connect()
 
-    def __del__(self):
-        del self
-
 
 class OpRawResponse(OpRawBase):
     def __init__(self, api_meth, **kwargs):
@@ -74,19 +71,14 @@ class OpRawResponse(OpRawBase):
         param = self.__list_to_tuple(data, sort_key, head)
         return param
 
-    def close(self):
-        self.__del__()
-
     def __del__(self):
-        del self
+        del self.handler
+
 
 
 class OpDbBase():
     def __init__(self, **kwargs):
         self.executor = SQLExecutor(**kwargs)
-
-    def __del__(self):
-        del self
 
 
 class OpDbCandlestick(OpDbBase):
@@ -99,7 +91,7 @@ class OpDbCandlestick(OpDbBase):
     def insert(self, param, **kwargs):
         sql = "INSERT IGNORE INTO `OKEX_CANDLESTICK_{0}` \
             (`PAIR_ID`, `PERIOD`, `TIMESTAMP`, `OPEN`, `CLOSE`, `HIGH`, `LOW`, `VOLUME`) \
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"                                                                                                                                                                                                                                                                    .format(
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        .format(
             self.period.upper())
 
         affected = self.executor.set(sql, param, **kwargs)
@@ -108,7 +100,7 @@ class OpDbCandlestick(OpDbBase):
     def get_last_stamp(self):
         sql = "SELECT `SEQ`,`TIMESTAMP` FROM `OKEX_CANDLESTICK_{0}` \
              WHERE `PAIR_ID`=%s \
-             ORDER BY `SEQ` DESC LIMIT 1"                                                                                                                                                                                                             .format(self.period.upper())
+             ORDER BY `SEQ` DESC LIMIT 1"                                                                                                                                                                                                                                                                                                                                                                                                                          .format(self.period.upper())
 
         result = self.executor.get(sql, param=(self.pair_id))
         if result and result != ['ERROR']:
@@ -116,12 +108,8 @@ class OpDbCandlestick(OpDbBase):
         else:
             return '0'
 
-    def close(self):
-        self.__del__()
-
     def __del__(self):
-        OpDbBase.__del__(self)
-        del self
+        del self.executor
 
 
 class OpDbTransaction(OpDbBase):
@@ -149,12 +137,8 @@ class OpDbTransaction(OpDbBase):
         else:
             return '0'
 
-    def close(self):
-        self.__del__()
-
     def __del__(self):
-        OpDbBase.__del__(self)
-        del self
+        del self.executor
 
 
 class OpDbPair(OpDbBase):
@@ -196,12 +180,8 @@ class OpDbPair(OpDbBase):
         affected = self.executor.set(sql, (param))
         return affected
 
-    def close(self):
-        self.__del__()
-
     def __del__(self):
-        OpDbBase.__del__(self)
-        del self
+        del self.executor
 
 
 class OpTimer():

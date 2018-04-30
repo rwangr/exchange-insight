@@ -66,8 +66,8 @@ class SQLExecutor():
         #-----Debug Log-----#
         global CONN_COUNT
         CONN_COUNT += 1
-        logger.debug('Thread {0}-{1}: {2} connections in total. {3}'.format(
-            kwargs.get('ID_1'), kwargs.get('ID_2'), CONN_COUNT, kwargs))
+        logger.debug('Thread {0}: {1} connections in total. {2}.'.format(
+            kwargs.get('ID'), CONN_COUNT, kwargs))
         #-----Debug Log-----#
 
     def set(self, sql, param=(), many=False):
@@ -112,12 +112,9 @@ class SQLExecutor():
             return result
 
     def __del__(self):
-        try:
-            self.connection.close()
-            global CONN_COUNT
-            CONN_COUNT -= 1
-        except Exception as e:
-            pass
+        self.connection.close()
+        global CONN_COUNT
+        CONN_COUNT -= 1
 
     # import importlib
     # module = importlib.import_module(method)
@@ -134,3 +131,4 @@ class APIConnBase:
                                               API_STRING['secretkey'])
 
         return parser
+
