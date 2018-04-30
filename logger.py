@@ -11,12 +11,12 @@ class Logger():
 
     def start(self):
         logger = logging.getLogger(self.name)
-        logger.setLevel(logging.INFO)
+        logger.setLevel(logging.DEBUG)
         date = time.strftime('%Y%m%d', time.localtime(time.time()))
         log_path = os.path.split(os.path.realpath(sys.argv[0]))[0] + '/logs/'
         log_filename = log_path + self.name + '_' + date + '.log'
         handler = logging.FileHandler(log_filename, mode='a')
-        handler.setLevel(logging.INFO)
+        handler.setLevel(logging.DEBUG)
         formatter = logging.Formatter(
             "{0} | %(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s".
             format(self.time))
