@@ -55,7 +55,7 @@ class OpRawResponse(OpRawBase):
 
             db_parser = OpDbPair(EXCHANGE)
             affected = db_parser.count_error(self.kwargs.get('pair_id'))
-            db_parser.close()
+            del db_parser
 
             #-----Info Log-----#
             logger.info('Error Count Increased: {0}'.format(self.kwargs))
