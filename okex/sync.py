@@ -144,4 +144,4 @@ class SyncPairsInsertThrd(threading.Thread):
                     self.param_queue.task_done()
 
                 elif self.timer.timesup():
-                    break
+                    pass
