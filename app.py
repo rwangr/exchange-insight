@@ -11,6 +11,7 @@ import threading
 import pymysql.cursors
 from decimal import *
 from okex.okexAPI.rest.OkcoinSpotAPI import *
+from okex.config import *
 from okex.sync import *
 from logger import *
 

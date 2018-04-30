@@ -9,14 +9,10 @@ import threading
 import pymysql.cursors
 from decimal import *
 from okex.okexAPI.rest.OkcoinSpotAPI import *
+from okex.config import *
 from okex.base import *
 from okex.ops import *
 from logger import *
-
-MAX_THRD_API = 15
-MAX_THRD_OPDB = 5
-MAX_THRD_IDLE_TIMEOUT = 2
-INSERT_COUNT = 0
 
 
 class SyncPairsThrdLaunch():
@@ -57,9 +53,9 @@ class SyncPairsThrdLaunch():
             self.db_threads.append(thread)
 
     def start(self):
-        parser = OpDbPair('okex')
+        parser = OpDbPair(EXCHANGE)
         pairs = parser.get_active()
-        del parser
+        parser.close()
         self.__set_pair_queue(pairs)
         self.__init_thread()
         self.pair_queue.join()
@@ -87,11 +83,11 @@ class SyncPairsFetchThrd(threading.Thread):
                     db_parser = globals().get(self.db_meth)(**pair,
                                                             **self.kwargs)
                     stamp = db_parser.get_last_stamp()
-                    del db_parser
+                    db_parser.close()
                     api_parser = OpRawResponse(self.api_meth, **pair,
                                                **self.kwargs)
                     param = api_parser.get_insert_param(stamp)
-                    del api_parser
+                    api_parser.close()
                     if param and len(param) > 1:
                         self.param_queue.put({'pair': pair, 'param': param})
                         param = None
@@ -120,6 +116,7 @@ class SyncPairsInsertThrd(threading.Thread):
                     db_parser = globals().get(self.db_meth)(**pair,
                                                             **self.kwargs)
                     affected = db_parser.insert(param, many=True)
+
                     #-----Info Log-----#
                     global INSERT_COUNT
                     if (affected) is int:
@@ -131,6 +128,7 @@ class SyncPairsInsertThrd(threading.Thread):
                             pair.get('pair_id'), pair.get('symbol'),
                             self.kwargs.get('period'), INSERT_COUNT))
                     #-----Info Log-----#
+
                     param = None
                     self.param_queue.task_done()
 

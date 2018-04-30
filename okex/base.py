@@ -9,10 +9,9 @@ from DBUtils.PooledDB import PooledDB
 from DBUtils.PersistentDB import PersistentDB
 from okex.okexAPI.rest.OkcoinSpotAPI import *
 from decimal import *
+from okex.config import *
 from okex.secret import *
 from logger import *
-
-CONN_COUNT = 0
 
 
 class DBConnBase():
@@ -34,12 +33,12 @@ class DBConnBase():
             #     charset=CONN_STRING['charset'])
             CONN_POOL = PooledDB(
                 creator=pymysql,
-                maxconnections=20,
-                mincached=15,
-                maxcached=20,
-                maxshared=0,
+                maxconnections=CONN_POOL_MAX_CONNECTIONS,
+                mincached=CONN_POOL_MIN_CACHED,
+                maxcached=CONN_POOL_MAX_CACHED,
+                maxshared=CONN_POOL_MAX_SHARED,
+                maxusage=CONN_POOL_MAX_USAGE,
                 blocking=True,
-                maxusage=0,
                 setsession=[],
                 ping=0,
                 host=CONN_STRING['host'],
@@ -81,10 +80,12 @@ class SQLExecutor():
             self.connection.commit()
         except Exception as e:
             self.connection.rollback()
+
             #-----Warning Log-----#
             logger.warning('SQLExcutor set() Error: {0} : ({1})'.format(
                 str(e), param))
             #-----Warning Log-----#
+
         finally:
             cursor.close()
             return result
@@ -100,10 +101,12 @@ class SQLExecutor():
                 result = cursor.fetchone()
         except Exception as e:
             result = ['ERROR']
+
             #-----Warning Log-----#
             logger.warning('SQLExcutor get() Error: {0} : ({1})'.format(
                 str(e), param))
             #-----Warning Log-----#
+
         finally:
             cursor.close()
             return result

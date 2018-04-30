@@ -7,6 +7,7 @@ import logging
 import pymysql.cursors
 from decimal import *
 from okex.okexAPI.rest.OkcoinSpotAPI import *
+from okex.config import *
 from okex.base import *
 from logger import *
 
@@ -44,12 +45,22 @@ class OpRawResponse(OpRawBase):
         data = eval('self.handler.%s' % self.api_meth)(
             **self.kwargs, since=stamp)
         if type(data) == dict and data.get('error_code'):
+
             #-----Warning Log-----#
             logger.warning(
                 'API {0} Responds Error: Code {1}, Param(kwargs: {2},stamp: {3})'.
                 format(self.api_meth, data.get('error_code'), self.kwargs,
                        stamp))
             #-----Warning Log-----#
+
+            db_parser = OpDbPair(EXCHANGE)
+            affected = db_parser.count_error(self.kwargs.get('pair_id'))
+            db_parser.close()
+
+            #-----Info Log-----#
+            logger.info('Error Count Increased: {0}'.format(self.kwargs))
+            #-----Info Log-----#
+
             return ()
         if self.api_meth == 'kline':
             sort_key = None
@@ -59,6 +70,12 @@ class OpRawResponse(OpRawBase):
             head = [self.kwargs.get('pair_id')]
         param = self.__list_to_tuple(data, sort_key, head)
         return param
+
+    def close(self):
+        self.__del__()
+
+    def __del__(self):
+        del self
 
 
 class OpDbBase():
@@ -93,6 +110,12 @@ class OpDbCandlestick(OpDbBase):
         else:
             return '0'
 
+    def close(self):
+        self.__del__()
+
+    def __del__(self):
+        del self
+
 
 class OpDbTransaction(OpDbBase):
     def __init__(self, pair_id, **kwargs):
@@ -119,6 +142,12 @@ class OpDbTransaction(OpDbBase):
         else:
             return '0'
 
+    def close(self):
+        self.__del__()
+
+    def __del__(self):
+        del self
+
 
 class OpDbPair(OpDbBase):
     def __init__(self, exchange, **kwargs):
@@ -143,14 +172,27 @@ class OpDbPair(OpDbBase):
 
     def get_active(self):
         sql = "SELECT `PAIR_ID` AS 'pair_id', CONCAT(`BASE`,'_',`QUOTE`) AS 'symbol' \
-            FROM `GLOBAL_PAIRS` WHERE `EXCHANGE`=%s AND `ACTIVE`='1' \
+            FROM `GLOBAL_PAIRS` WHERE `EXCHANGE`=%s AND `ACTIVE`='1' AND `ERROR`<=%s \
             ORDER BY `PAIR_ID`"
 
-        result = self.executor.get(sql, param=(self.exchange), fetchall=True)
+        result = self.executor.get(
+            sql, param=(self.exchange, MAX_REMOVE_ERROR_COUNT), fetchall=True)
         if result and result != ['ERROR']:
             return result
         else:
             return []
+
+    def count_error(self, param):
+        sql = "UPDATE `GLOBAL_PAIRS` SET `ERROR`=`ERROR`+1 WHERE `PAIR_ID`=%s"
+
+        affected = self.executor.set(sql, (param))
+        return affected
+
+    def close(self):
+        self.__del__()
+
+    def __del__(self):
+        del self
 
 
 class OpTimer():
