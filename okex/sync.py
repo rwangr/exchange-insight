@@ -130,7 +130,7 @@ class SyncPairsInsertThrd(threading.Thread):
 
                     #-----Info Log-----#
                     global INSERT_COUNT
-                    if affected is int:
+                    if type(affected) is int:
                         INSERT_COUNT += affected
                     logger.info(
                         'Insert Thread {0}: {1} rows for ({2}, {3}, {4}) affected. {5} rows affected in total.'.
