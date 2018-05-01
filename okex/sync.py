@@ -53,7 +53,7 @@ class SyncPairsThrdLaunch():
             self.db_threads.append(thread)
 
     def start(self):
-        parser = OpDbPair(EXCHANGE)
+        parser = OpDbPair()
         pairs = parser.get_active()
         del parser
         self.__set_pair_queue(pairs)

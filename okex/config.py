@@ -6,7 +6,7 @@ import time
 import logging
 
 # Script Setup Params
-EXCHANGE = 'okex'
+EXCHANGE = 'OKEX'
 MAX_REMOVE_ERROR_COUNT = 2
 MAX_THRD_API = 15
 MAX_THRD_OPDB = 5

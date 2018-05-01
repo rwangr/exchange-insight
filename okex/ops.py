@@ -53,7 +53,7 @@ class OpRawResponse(OpRawBase):
                        stamp))
             #-----Warning Log-----#
 
-            db_parser = OpDbPair(EXCHANGE)
+            db_parser = OpDbPair()
             affected = db_parser.count_error(self.kwargs.get('pair_id'))
             del db_parser
 
@@ -75,9 +75,9 @@ class OpRawResponse(OpRawBase):
         del self.handler
 
 
-
 class OpDbBase():
     def __init__(self, **kwargs):
+        self.exchange = EXCHANGE
         self.executor = SQLExecutor(**kwargs)
 
 
@@ -89,18 +89,18 @@ class OpDbCandlestick(OpDbBase):
         OpDbBase.__init__(self, **kwargs)
 
     def insert(self, param, **kwargs):
-        sql = "INSERT IGNORE INTO `OKEX_CANDLESTICK_{0}` \
+        sql = "INSERT IGNORE INTO `{0}_CANDLESTICK_{1}` \
             (`PAIR_ID`, `PERIOD`, `TIMESTAMP`, `OPEN`, `CLOSE`, `HIGH`, `LOW`, `VOLUME`) \
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        .format(
-            self.period.upper())
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)".format(
+            self.exchange, self.period.upper())
 
         affected = self.executor.set(sql, param, **kwargs)
         return affected
 
     def get_last_stamp(self):
-        sql = "SELECT `SEQ`,`TIMESTAMP` FROM `OKEX_CANDLESTICK_{0}` \
+        sql = "SELECT `SEQ`,`TIMESTAMP` FROM `{0}_CANDLESTICK_{1}` \
              WHERE `PAIR_ID`=%s \
-             ORDER BY `SEQ` DESC LIMIT 1"                                                                                                                                                                                                                                                                                                                                                                                                                          .format(self.period.upper())
+             ORDER BY `SEQ` DESC LIMIT 1".format(self.exchange,self.period.upper())
 
         result = self.executor.get(sql, param=(self.pair_id))
         if result and result != ['ERROR']:
@@ -119,17 +119,17 @@ class OpDbTransaction(OpDbBase):
         OpDbBase.__init__(self, **kwargs)
 
     def insert(self, param, **kwargs):
-        sql = "INSERT IGNORE INTO `OKEX_TRANSACTION` \
+        sql = "INSERT IGNORE INTO `{0}_TRANSACTION` \
             (`PAIR_ID`, `TID`, `DATE`, `DATE_MS`, `PRICE`, `AMOUNT`, `TYPE`) \
-            VALUES (%s, %s, %s, %s, %s, %s, %s)"
+            VALUES (%s, %s, %s, %s, %s, %s, %s)".format(self.exchange)
 
         affected = self.executor.set(sql, param, **kwargs)
         return affected
 
     def get_last_stamp(self):
-        sql = "SELECT `SEQ`,`TID` FROM `OKEX_TRANSACTION` \
+        sql = "SELECT `SEQ`,`TID` FROM `{0}_TRANSACTION` \
              WHERE `PAIR_ID`=%s \
-             ORDER BY `seq` DESC LIMIT 1"
+             ORDER BY `seq` DESC LIMIT 1".format(self.exchange)
 
         result = self.executor.get(sql, param=(self.pair_id))
         if result and result != ['ERROR']:
@@ -142,8 +142,7 @@ class OpDbTransaction(OpDbBase):
 
 
 class OpDbPair(OpDbBase):
-    def __init__(self, exchange, **kwargs):
-        self.exchange = exchange
+    def __init__(self, **kwargs):
         self.quotes = ['btc', 'eth', 'usdt']
         self.kwargs = kwargs
         OpDbBase.__init__(self, **kwargs)
